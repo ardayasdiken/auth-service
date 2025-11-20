@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: auth-postgres
+    environment:
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: auth_password
+      POSTGRES_DB: auth_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - auth_pgdata:/var/lib/postgresql/data
+
+  auth-service:
+    build: .
+    container_name: auth-service
+    environment:
+      - PORT=4000
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=auth_user
+      - DB_PASSWORD=auth_password
+      - DB_NAME=auth_db
+      - JWT_ACCESS_SECRET=super_secret_access_key_change_me
+      - JWT_REFRESH_SECRET=super_secret_refresh_key_change_me
+      - JWT_ACCESS_EXPIRES_IN=15m
+      - JWT_REFRESH_EXPIRES_IN=7d
+    depends_on:
+      - postgres
+    ports:
+      - "4000:4000"
+
+volumes:
+  auth_pgdata:
